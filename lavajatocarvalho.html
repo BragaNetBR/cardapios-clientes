@@ -474,7 +474,8 @@
             `_Gostaria de confirmar o horário?_`;
 
         const phone = "5567999071626";
-        window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        window.location.href = `https://wa.me/${phone}?text=${message}`;
+
     }
 
     // Inicialização
