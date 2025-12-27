@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pet Shop Corumbá VIP</title>
+    
+    <!-- Fontes Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Ícones (Phosphor Icons via CDN) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        :root {
+            /* Paleta Clinical Elite */
+            --primary: #0A5F38; /* Verde Floresta */
+            --primary-light: #14804d;
+            --gold: #D4AF37; /* Dourado Metálico */
+            --action: #CC5500; /* Laranja Queimado */
+            --bg: #F5F7FA; /* Off-white */
+            --white: #FFFFFF;
+            --text-dark: #1A1A1A;
+            --text-gray: #666666;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-dark);
+            height: 100vh;
+            overflow: hidden; /* App feel */
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+        }
+
+        /* --- SKELETON LOADING --- */
+        #loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(10, 95, 56, 0.1);
+            border-left-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- HEADER --- */
+        header {
+            background: var(--white);
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .brand img {
+            height: 40px;
+            width: auto;
+        }
+        .brand-text h1 {
+            font-size: 16px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .vip-badge {
+            background: linear-gradient(135deg, var(--gold), #b89220);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            font-family: 'Montserrat';
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px; /* Space for Bottom Nav */
+            position: relative;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- HERO SECTION (HOME) --- */
+        .hero-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+            position: relative;
+            height: 200px;
+        }
+        .hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Usando a imagem da fachada */
+            background-image: url('input_file_6.jpeg'); 
+            background-size: cover;
+            background-position: center;
+        }
+        .hero-overlay {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(to top, rgba(10,95,56,0.9), transparent);
+            padding: 20px;
+            color: white;
+        }
+        .hero-text h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* --- SERVICES (EXPANDABLE CARDS) --- */
+        .service-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .service-card.expanded {
+            border-left: 4px solid var(--gold);
+        }
+        .service-header {
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+        .s-info { display: flex; align-items: center; gap: 15px; }
+        .s-icon {
+            width: 40px; height: 40px;
+            background: rgba(10, 95, 56, 0.1);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--primary);
+            font-size: 20px;
+        }
+        .s-title { font-weight: 600; color: var(--text-dark); }
+        
+        .service-details {
+            max-height: 0;
+            overflow: hidden;
+            background: #fafafa;
+            padding: 0 15px;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            font-size: 14px;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+        .service-card.expanded .service-details {
+            max-height: 200px;
+            padding: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        /* --- WIZARD (BOOKING) --- */
+        .wizard-step { display: none; }
+        .wizard-step.active-step { display: block; animation: slideLeft 0.3s ease; }
+        
+        @keyframes slideLeft {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .step-header { margin-bottom: 20px; }
+        .step-header h2 { color: var(--primary); font-size: 18px; }
+        .step-indicator { 
+            display: flex; gap: 5px; margin-bottom: 20px; 
+        }
+        .dot { 
+            height: 4px; flex: 1; background: #ddd; border-radius: 2px; transition: 0.3s;
+        }
+        .dot.active { background: var(--gold); }
+
+        /* Option Grid */
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .selection-card {
+            background: var(--white);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+        .selection-card.selected {
+            border-color: var(--primary);
+            background: rgba(10, 95, 56, 0.05);
+        }
+        .selection-card i {
+            font-size: 24px;
+            color: var(--gold);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 4px 15px rgba(10, 95, 56, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-action { background: var(--action); }
+
+        /* Summary Box */
+        .summary-box {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid var(--gold);
+        }
+        .summary-item {
+            display: flex; justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .total {
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            margin-top: 10px;
+            font-weight: bold; color: var(--primary);
+        }
+
+        /* --- BOTTOM NAVIGATION --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: var(--white);
+            height: 70px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.05);
+            z-index: 100;
+            padding-bottom: 5px; /* Safe area */
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-gray);
+            font-size: 10px;
+            gap: 4px;
+            cursor: pointer;
+            width: 60px;
+        }
+        .nav-item i {
+            font-size: 24px;
+            transition: 0.2s;
+        }
+        .nav-item.active {
+            color: var(--primary);
+        }
+        .nav-item.active i {
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Ripple Effect Logic via CSS Active */
+        button, .selection-card, .service-header {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; font-weight: 500; color: var(--primary);">Carregando Experiência VIP...</p>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <!-- Usando a logo do arquivo 7 -->
+            <img src="input_file_7.png" alt="Logo">
+            <div class="brand-text">
+                <h1>Pet Shop Corumbá</h1>
+            </div>
+        </div>
+        <div class="vip-badge">CLINICAL ELITE</div>
+    </header>
+
+    <main>
+        <!-- ABA 1: INÍCIO -->
+        <div id="tab-home" class="tab-content active">
+            
+            <div class="hero-card">
+                <div class="hero-img"></div>
+                <div class="hero-overlay">
+                    <h2 id="hero-title">Excelência Veterinária</h2>
+                    <p id="hero-subtitle">Seu pet merece o melhor cuidado de Corumbá.</p>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 15px;">Destaques da Clínica</h3>
+            <div class="option-grid">
+                <div class="selection-card" onclick="navToService()">
+                    <i class="ph ph-first-aid"></i>
+                    <p>Veterinária 24h</p>
+                </div>
+                <div class="selection-card" onclick="navToService()">
+                    <i class="ph ph-shower"></i>
+                    <p>Banho & Tosa</p>
+                </div>
+                <div class="selection-card" onclick="navToService()">
+                    <i class="ph ph-house-line"></i>
+                    <p>Hotelzinho</p>
+                </div>
+                <div class="selection-card" onclick="navToService()">
+                    <i class="ph ph-pill"></i>
+                    <p>Farmácia</p>
+                </div>
+            </div>
+
+            <!-- Imagem de ambiente para prova social -->
+            <div style="margin-top: 25px; border-radius: 12px; overflow: hidden; position: relative;">
+                <img src="input_file_1.jpeg" style="width: 100%; display: block;" alt="Interior">
+                <div style="background: var(--primary); padding: 15px; color: white; text-align: center;">
+                    <p style="font-size: 14px;">"Trata os animais com cuidado e amor."</p>
+                    <small>- Amanda H., Cliente VIP</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 2: SERVIÇOS -->
+        <div id="tab-services" class="tab-content">
+            <h2 style="margin-bottom: 20px;">Menu de Serviços</h2>
+            
+            <!-- Service 1 -->
+            <div class="service-card" onclick="toggleService(this)">
+                <div class="service-header">
+                    <div class="s-info">
+                        <div class="s-icon"><i class="ph ph-shower"></i></div>
+                        <span class="s-title">Ritual de Banho Premium</span>
+                    </div>
+                    <i class="ph ph-caret-down"></i>
+                </div>
+                <div class="service-details">
+                    Utilizamos produtos hipoalergênicos da linha Golden/Premier. Inclui corte de unhas, limpeza de ouvidos e perfume importado. Ideal para manter a pelagem brilhante.
+                </div>
+            </div>
+
+            <!-- Service 2 -->
+            <div class="service-card" onclick="toggleService(this)">
+                <div class="service-header">
+                    <div class="s-info">
+                        <div class="s-icon"><i class="ph ph-scissors"></i></div>
+                        <span class="s-title">Tosa & Estética</span>
+                    </div>
+                    <i class="ph ph-caret-down"></i>
+                </div>
+                <div class="service-details">
+                    Tosa higiênica, tosa bebê ou tosa da raça. Profissionais especializados em acabamento na tesoura para um visual impecável.
+                </div>
+            </div>
+
+            <!-- Service 3 -->
+            <div class="service-card" onclick="toggleService(this)">
+                <div class="service-header">
+                    <div class="s-info">
+                        <div class="s-icon"><i class="ph ph-bed"></i></div>
+                        <span class="s-title">Hotel Conforto</span>
+                    </div>
+                    <i class="ph ph-caret-down"></i>
+                </div>
+                <div class="service-details">
+                    Hospedagem segura com supervisão veterinária, recreação monitorada e ambientes climatizados. Seu pet se sente em casa.
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn-primary" onclick="goToBooking()">Agendar Tratamento</button>
+            </div>
+        </div>
+
+        <!-- ABA 3: AGENDAR (WIZARD) -->
+        <div id="tab-schedule" class="tab-content">
+            
+            <div class="step-indicator">
+                <div class="dot active" id="dot-1"></div>
+                <div class="dot" id="dot-2"></div>
+                <div class="dot" id="dot-3"></div>
+            </div>
+
+            <!-- Step 1: Pet Info -->
+            <div class="wizard-step active-step" id="step-1">
+                <div class="step-header">
+                    <h2>1. Qual o porte do seu pet?</h2>
+                    <p style="color: #888; font-size: 13px;">Para calcularmos o tempo ideal.</p>
+                </div>
+                <div class="option-grid">
+                    <div class="selection-card" onclick="selectOption('size', 'Pequeno', this)">
+                        <i class="ph ph-paw-print"></i>
+                        <p>Pequeno</p>
+                    </div>
+                    <div class="selection-card" onclick="selectOption('size', 'Médio', this)">
+                        <i class="ph ph-dog"></i>
+                        <p>Médio</p>
+                    </div>
+                    <div class="selection-card" onclick="selectOption('size', 'Grande', this)">
+                        <i class="ph ph-horse"></i> <!-- Usando ícone maior figurativamente -->
+                        <p>Grande</p>
+                    </div>
+                    <div class="selection-card" onclick="selectOption('size', 'Gato', this)">
+                        <i class="ph ph-cat"></i>
+                        <p>Felino</p>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="nextStep(2)">Continuar</button>
+            </div>
+
+            <!-- Step 2: Serviços -->
+            <div class="wizard-step" id="step-2">
+                <div class="step-header">
+                    <h2>2. O que deseja realizar?</h2>
+                    <p style="color: #888; font-size: 13px;">Selecione um ou mais.</p>
+                </div>
+                <div class="option-grid">
+                    <div class="selection-card" onclick="toggleMultiOption('service', 'Banho Premium', this)">
+                        <i class="ph ph-shower"></i>
+                        <p>Banho VIP</p>
+                    </div>
+                    <div class="selection-card" onclick="toggleMultiOption('service', 'Tosa Completa', this)">
+                        <i class="ph ph-scissors"></i>
+                        <p>Tosa</p>
+                    </div>
+                    <div class="selection-card" onclick="toggleMultiOption('service', 'Vacinação', this)">
+                        <i class="ph ph-syringe"></i>
+                        <p>Vacinas</p>
+                    </div>
+                    <div class="selection-card" onclick="toggleMultiOption('service', 'Consulta', this)">
+                        <i class="ph ph-stethoscope"></i>
+                        <p>Consulta</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-primary" style="background:#ddd; color:#666" onclick="prevStep(1)">Voltar</button>
+                    <button class="btn-primary" onclick="nextStep(3)">Continuar</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Resumo e WhatsApp -->
+            <div class="wizard-step" id="step-3">
+                <div class="step-header">
+                    <h2>3. Resumo do Agendamento</h2>
+                    <p style="color: #888; font-size: 13px;">Confirme os dados antes de enviar.</p>
+                </div>
+
+                <div class="summary-box">
+                    <div class="summary-item">
+                        <span>Porte:</span>
+                        <strong id="summary-size">-</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Serviços:</span>
+                        <strong id="summary-services">-</strong>
+                    </div>
+                    <div class="total">
+                        <p>Local: Pet Shop Corumbá</p>
+                        <p style="font-size: 12px; color: #666; font-weight: normal;">R. Vinte Um de Setembro, 1359</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <label style="font-size: 14px; color: #666;">Preferência de turno:</label>
+                    <select id="shift-select" style="width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ddd; border-radius: 8px;">
+                        <option value="Manhã">Manhã (08h - 12h)</option>
+                        <option value="Tarde">Tarde (13h - 18h)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-primary" style="background:#ddd; color:#666" onclick="prevStep(2)">Voltar</button>
+                    <button class="btn-primary btn-action" onclick="finishBooking()">
+                        <i class="ph ph-whatsapp-logo"></i> Finalizar no WhatsApp
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <i class="ph ph-house"></i>
+            <span>Início</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('services', this)">
+            <i class="ph ph-list-dashes"></i>
+            <span>Serviços</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('schedule', this)">
+            <i class="ph ph-calendar-plus"></i>
+            <span>Agendar</span>
+        </div>
+    </nav>
+
+    <script>
+        // --- STATES ---
+        const bookingData = {
+            size: '',
+            services: []
+        };
+
+        // --- INIT ---
+        window.onload = () => {
+            // Simulate loading
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                }, 500);
+            }, 1500);
+
+            // Slider Logic
+            const titles = ["Excelência Veterinária", "Estética de Luxo", "Saúde e Bem-estar"];
+            const subtitles = ["Seu pet merece o melhor cuidado.", "Profissionais premiados.", "Tecnologia de ponta."];
+            let idx = 0;
+            setInterval(() => {
+                idx = (idx + 1) % titles.length;
+                document.getElementById('hero-title').innerText = titles[idx];
+                document.getElementById('hero-subtitle').innerText = subtitles[idx];
+            }, 4000);
+        };
+
+        // --- NAVIGATION ---
+        function switchTab(tabName, el) {
+            // Icons styling
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+
+            // Tab Content
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        function navToService() {
+            // Atalho da Home para Serviços
+            const serviceBtn = document.querySelectorAll('.nav-item')[1];
+            switchTab('services', serviceBtn);
+        }
+
+        function goToBooking() {
+            // Atalho de Serviços para Agendar
+            const bookingBtn = document.querySelectorAll('.nav-item')[2];
+            switchTab('schedule', bookingBtn);
+        }
+
+        // --- SERVICES ACCORDION ---
+        function toggleService(card) {
+            // Fecha outros (opcional, aqui mantemos aberto multiplos)
+            // card.classList.toggle('expanded');
+            
+            // Lógica de acordeão único
+            const isExpanded = card.classList.contains('expanded');
+            document.querySelectorAll('.service-card').forEach(c => c.classList.remove('expanded'));
+            if(!isExpanded) card.classList.add('expanded');
+        }
+
+        // --- WIZARD LOGIC ---
+        function nextStep(step) {
+            if(step === 2 && !bookingData.size) {
+                alert("Por favor, selecione o porte do pet.");
+                return;
+            }
+            if(step === 3 && bookingData.services.length === 0) {
+                alert("Selecione pelo menos um serviço.");
+                return;
+            }
+
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active-step'));
+            // Show target
+            document.getElementById(`step-${step}`).classList.add('active-step');
+            
+            // Dots
+            document.querySelectorAll('.dot').forEach((d, i) => {
+                if(i < step) d.classList.add('active');
+                else d.classList.remove('active');
+            });
+
+            // Update Summary
+            if(step === 3) {
+                document.getElementById('summary-size').innerText = bookingData.size;
+                document.getElementById('summary-services').innerText = bookingData.services.join(', ');
+            }
+        }
+
+        function prevStep(step) {
+            document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active-step'));
+            document.getElementById(`step-${step}`).classList.add('active-step');
+             document.querySelectorAll('.dot').forEach((d, i) => {
+                if(i < step) d.classList.add('active');
+                else d.classList.remove('active');
+            });
+        }
+
+        // --- SELECTION LOGIC ---
+        function selectOption(type, value, el) {
+            if(type === 'size') {
+                bookingData.size = value;
+                // Visual feedback
+                el.parentElement.querySelectorAll('.selection-card').forEach(c => c.classList.remove('selected'));
+                el.classList.add('selected');
+            }
+        }
+
+        function toggleMultiOption(type, value, el) {
+            if(type === 'service') {
+                if(bookingData.services.includes(value)) {
+                    bookingData.services = bookingData.services.filter(item => item !== value);
+                    el.classList.remove('selected');
+                } else {
+                    bookingData.services.push(value);
+                    el.classList.add('selected');
+                }
+            }
+        }
+
+        // --- WHATSAPP INTEGRATION ---
+        function finishBooking() {
+            const phone = "556799491141"; // Número informado no prompt
+            const shift = document.getElementById('shift-select').value;
+            
+            // Formatação Profissional da Mensagem
+            const text = `
+*Olå! Vim pelo App VIP do Pet Shop Corumbá.* 🐶✨
+
+Gostaria de solicitar um agendamento:
+------------------------------
+🐾 *Porte:* ${bookingData.size}
+📋 *Serviços:* ${bookingData.services.join(', ')}
+📅 *Turno Pref:* ${shift}
+------------------------------
+
+Aguardo confirmação de horário disponível!
+            `.trim();
+
+            const encodedText = encodeURIComponent(text);
+            
+            // USANDO LOCATION.HREF PARA COMPATIBILIDADE WEBVIEW
+            window.location.href = `https://wa.me/${phone}?text=${encodedText}`;
+        }
+    </script>
+</body>
+</html>
