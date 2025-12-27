@@ -38,7 +38,7 @@
             background-color: var(--bg);
             color: var(--text-dark);
             height: 100vh;
-            overflow: hidden; /* App feel */
+            overflow: hidden; /* Comportamento de App */
             display: flex;
             flex-direction: column;
         }
@@ -87,7 +87,11 @@
         .brand img {
             height: 40px;
             width: auto;
+            object-fit: contain;
         }
+        /* Ocultar logo se quebrar e mostrar texto */
+        .brand img.error { display: none; }
+        
         .brand-text h1 {
             font-size: 16px;
             color: var(--primary);
@@ -108,7 +112,7 @@
         main {
             flex: 1;
             overflow-y: auto;
-            padding-bottom: 80px; /* Space for Bottom Nav */
+            padding-bottom: 80px; /* Espaço para o menu inferior */
             position: relative;
         }
 
@@ -134,16 +138,30 @@
             margin-bottom: 25px;
             position: relative;
             height: 200px;
+            background-color: #ddd; /* Cor base */
         }
         .hero-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            /* Usando a imagem da fachada */
-            background-image: url('input_file_6.jpeg'); 
+            /* Tenta carregar banner.jpg */
+            background-image: url('banner.jpg'); 
             background-size: cover;
             background-position: center;
+            transition: opacity 0.3s;
         }
+        /* Classe de erro para o banner */
+        .hero-img.img-error {
+            background-image: none !important;
+            background-color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .hero-img.img-error::after {
+            content: "Pet Shop Corumbá";
+            color: rgba(255,255,255,0.3);
+            font-weight: bold;
+            font-size: 24px;
+        }
+
         .hero-overlay {
             position: absolute;
             bottom: 0; left: 0; width: 100%;
@@ -289,6 +307,22 @@
             font-weight: bold; color: var(--primary);
         }
 
+        /* --- SOCIAL PROOF IMAGE --- */
+        .social-proof-img {
+            margin-top: 25px; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            position: relative;
+            min-height: 150px;
+            background: #eee;
+        }
+        .social-proof-img img {
+            width: 100%; 
+            display: block;
+            min-height: 150px;
+            object-fit: cover;
+        }
+
         /* --- BOTTOM NAVIGATION --- */
         .bottom-nav {
             position: fixed;
@@ -300,7 +334,7 @@
             align-items: center;
             box-shadow: 0 -2px 20px rgba(0,0,0,0.05);
             z-index: 100;
-            padding-bottom: 5px; /* Safe area */
+            padding-bottom: 5px;
         }
         .nav-item {
             display: flex;
@@ -324,12 +358,6 @@
             color: var(--primary);
             transform: translateY(-2px);
         }
-
-        /* Ripple Effect Logic via CSS Active */
-        button, .selection-card, .service-header {
-            position: relative;
-            overflow: hidden;
-        }
     </style>
 </head>
 <body>
@@ -343,8 +371,8 @@
     <!-- Header -->
     <header>
         <div class="brand">
-            <!-- Usando a logo do arquivo 7 -->
-            <img src="input_file_7.png" alt="Logo">
+            <!-- Tenta carregar logo.png. Se falhar, esconde a imagem. -->
+            <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
             <div class="brand-text">
                 <h1>Pet Shop Corumbá</h1>
             </div>
@@ -357,7 +385,8 @@
         <div id="tab-home" class="tab-content active">
             
             <div class="hero-card">
-                <div class="hero-img"></div>
+                <!-- Tenta carregar banner.jpg via CSS/JS -->
+                <div class="hero-img" id="hero-banner"></div>
                 <div class="hero-overlay">
                     <h2 id="hero-title">Excelência Veterinária</h2>
                     <p id="hero-subtitle">Seu pet merece o melhor cuidado de Corumbá.</p>
@@ -385,8 +414,9 @@
             </div>
 
             <!-- Imagem de ambiente para prova social -->
-            <div style="margin-top: 25px; border-radius: 12px; overflow: hidden; position: relative;">
-                <img src="input_file_1.jpeg" style="width: 100%; display: block;" alt="Interior">
+            <div class="social-proof-img">
+                <!-- Tenta carregar interior.jpg, se falhar, carrega um placeholder online -->
+                <img src="interior.jpg" alt="Interior" onerror="this.src='https://placehold.co/600x400/0A5F38/FFF?text=Pet+Shop+Corumb%C3%A1'">
                 <div style="background: var(--primary); padding: 15px; color: white; text-align: center;">
                     <p style="font-size: 14px;">"Trata os animais com cuidado e amor."</p>
                     <small>- Amanda H., Cliente VIP</small>
@@ -470,7 +500,7 @@
                         <p>Médio</p>
                     </div>
                     <div class="selection-card" onclick="selectOption('size', 'Grande', this)">
-                        <i class="ph ph-horse"></i> <!-- Usando ícone maior figurativamente -->
+                        <i class="ph ph-horse"></i>
                         <p>Grande</p>
                     </div>
                     <div class="selection-card" onclick="selectOption('size', 'Gato', this)">
@@ -569,15 +599,15 @@
     </nav>
 
     <script>
-        // --- STATES ---
+        // --- STATES (Dados do agendamento) ---
         const bookingData = {
             size: '',
             services: []
         };
 
-        // --- INIT ---
+        // --- INIT & IMAGE CHECKER ---
         window.onload = () => {
-            // Simulate loading
+            // Remover loading após carregar
             setTimeout(() => {
                 document.getElementById('loader').style.opacity = '0';
                 setTimeout(() => {
@@ -585,7 +615,15 @@
                 }, 500);
             }, 1500);
 
-            // Slider Logic
+            // Verificador de Imagem do Banner (Hack para CSS background)
+            // Se banner.jpg não existir, adiciona classe de erro para mostrar fundo sólido
+            const bannerImg = new Image();
+            bannerImg.src = 'banner.jpg';
+            bannerImg.onerror = function() {
+                document.getElementById('hero-banner').classList.add('img-error');
+            };
+
+            // Slider Logic (Troca os textos automaticamente)
             const titles = ["Excelência Veterinária", "Estética de Luxo", "Saúde e Bem-estar"];
             const subtitles = ["Seu pet merece o melhor cuidado.", "Profissionais premiados.", "Tecnologia de ponta."];
             let idx = 0;
@@ -596,13 +634,13 @@
             }, 4000);
         };
 
-        // --- NAVIGATION ---
+        // --- NAVIGATION (Troca de abas) ---
         function switchTab(tabName, el) {
-            // Icons styling
+            // Estilo dos ícones
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             el.classList.add('active');
 
-            // Tab Content
+            // Conteúdo das abas
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             document.getElementById(`tab-${tabName}`).classList.add('active');
         }
@@ -619,19 +657,16 @@
             switchTab('schedule', bookingBtn);
         }
 
-        // --- SERVICES ACCORDION ---
+        // --- SERVICES ACCORDION (Expandir serviços) ---
         function toggleService(card) {
-            // Fecha outros (opcional, aqui mantemos aberto multiplos)
-            // card.classList.toggle('expanded');
-            
-            // Lógica de acordeão único
             const isExpanded = card.classList.contains('expanded');
             document.querySelectorAll('.service-card').forEach(c => c.classList.remove('expanded'));
             if(!isExpanded) card.classList.add('expanded');
         }
 
-        // --- WIZARD LOGIC ---
+        // --- WIZARD LOGIC (Passo a passo do agendamento) ---
         function nextStep(step) {
+            // Validações
             if(step === 2 && !bookingData.size) {
                 alert("Por favor, selecione o porte do pet.");
                 return;
@@ -641,18 +676,18 @@
                 return;
             }
 
-            // Hide all steps
+            // Esconde todos
             document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active-step'));
-            // Show target
+            // Mostra o atual
             document.getElementById(`step-${step}`).classList.add('active-step');
             
-            // Dots
+            // Atualiza bolinhas (dots)
             document.querySelectorAll('.dot').forEach((d, i) => {
                 if(i < step) d.classList.add('active');
                 else d.classList.remove('active');
             });
 
-            // Update Summary
+            // Atualiza Resumo no passo final
             if(step === 3) {
                 document.getElementById('summary-size').innerText = bookingData.size;
                 document.getElementById('summary-services').innerText = bookingData.services.join(', ');
@@ -668,7 +703,7 @@
             });
         }
 
-        // --- SELECTION LOGIC ---
+        // --- SELECTION LOGIC (Cliques nos cartões) ---
         function selectOption(type, value, el) {
             if(type === 'size') {
                 bookingData.size = value;
@@ -692,7 +727,7 @@
 
         // --- WHATSAPP INTEGRATION ---
         function finishBooking() {
-            const phone = "556799491141"; // Número informado no prompt
+            const phone = "556799491141"; // Número oficial
             const shift = document.getElementById('shift-select').value;
             
             // Formatação Profissional da Mensagem
@@ -711,7 +746,7 @@ Aguardo confirmação de horário disponível!
 
             const encodedText = encodeURIComponent(text);
             
-            // USANDO LOCATION.HREF PARA COMPATIBILIDADE WEBVIEW
+            // Redirecionamento seguro para WebView
             window.location.href = `https://wa.me/${phone}?text=${encodedText}`;
         }
     </script>
