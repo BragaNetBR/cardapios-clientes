@@ -474,8 +474,8 @@
             `_Gostaria de confirmar o horário?_`;
 
         const phone = "5567999071626";
-        // Tente usar o protocolo direto do App
-window.location.href = `whatsapp://send?phone=${telefone}&text=${encodeURIComponent(texto)}`;
+        // Link normal de internet (HTTPS)
+window.location.href = `https://wa.me/${telefone}?text=${encodeURIComponent(texto)}`;
 
 
     }
