@@ -411,7 +411,6 @@
         element.classList.add('active');
 
         // Logic Update
-        // Precisamos saber qual serviço é para manter a consistência com o tamanho do carro
         if (name.includes('Titânio')) state.basePrice = serviceBasePrices.titanio;
         if (name.includes('Geral')) state.basePrice = serviceBasePrices.geral;
         if (name.includes('Ducha')) state.basePrice = serviceBasePrices.ducha;
@@ -422,7 +421,6 @@
 
     function toggleUpsell(price, name, element) {
         element.classList.toggle('active');
-        
         const isActive = element.classList.contains('active');
         
         if (isActive) {
@@ -430,12 +428,10 @@
         } else {
             state.upsells = state.upsells.filter(item => item.name !== name);
         }
-        
         calculateTotal();
     }
 
     function updateDisplayedPrices() {
-        // Atualiza os preços nos cards baseado no tamanho do carro
         const add = state.carAdicional;
         document.getElementById('price-titanio').innerText = `R$ ${serviceBasePrices.titanio + add}`;
         document.getElementById('price-geral').innerText = `R$ ${serviceBasePrices.geral + add}`;
@@ -443,13 +439,9 @@
     }
 
     function calculateTotal() {
-        // Total = (Preço Base do Serviço + Adicional do Carro) + Upsells
         let serviceTotal = state.basePrice + state.carAdicional;
         let upsellTotal = state.upsells.reduce((acc, item) => acc + item.price, 0);
-        
         state.total = serviceTotal + upsellTotal;
-        
-        // Animação simples do número
         document.getElementById('totalDisplay').innerText = `R$ ${state.total}`;
     }
 
@@ -461,22 +453,26 @@
         // Formatar lista de adicionais
         let extrasText = "";
         if (state.upsells.length > 0) {
-            extrasText = "%0a➕ *Adicionais:* " + state.upsells.map(u => u.name).join(", ");
+            extrasText = "\n➕ *Adicionais:* " + state.upsells.map(u => u.name).join(", ");
         }
 
-        const message = `*NOVO AGENDAMENTO - CARVALHO* 🚘%0a%0a` +
-            `👤 *Cliente:* ${name}%0a` +
-            `🚙 *Veículo:* ${state.carType}%0a` +
-            `🛠 *Serviço:* ${state.serviceName}%0a` +
+        // Montando a mensagem (Usando \n para quebra de linha)
+        const message = `*NOVO AGENDAMENTO - CARVALHO* 🚘\n\n` +
+            `👤 *Cliente:* ${name}\n` +
+            `🚙 *Veículo:* ${state.carType}\n` +
+            `🛠 *Serviço:* ${state.serviceName}\n` +
             `📅 *Quando:* ${day} - ${time}` +
-            `${extrasText}%0a%0a` +
-            `💰 *Valor Estimado:* R$ ${state.total},00%0a%0a` +
+            `${extrasText}\n\n` +
+            `💰 *Valor Estimado:* R$ ${state.total},00\n\n` +
             `_Gostaria de confirmar o horário?_`;
 
-        const phone = "5567999071626";
-        wa.me/${phone}?text=${encodeURIComponent(message)}
+        // Número correto
+        const phone = "5567999071626"; 
 
-
+        // --- CORREÇÃO AQUI ---
+        // Agora usamos as variáveis certas (phone e message)
+        // E usamos encodeURIComponent para garantir que espaços e quebras funcionem
+        window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     }
 
     // Inicialização
